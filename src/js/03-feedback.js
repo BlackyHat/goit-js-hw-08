@@ -15,45 +15,44 @@ refs.form.addEventListener('input', throttle(onLocalStorageSave, 500));
 //додаємо слухача на натиснення кнопки submit
 refs.form.addEventListener('submit', onFormSubmit);
 
-//перевіряємо чи є дані від попереднього введення у форму та якщо є - прописуємо збережені дані у форму
-// getStorageKey();
+//перевірка на помилку JSON
+const load = key => {
+  try {
+    const serializedState = localStorage.getItem(key);
+    return serializedState === null ? undefined : JSON.parse(serializedState);
+  } catch (error) {
+    console.error('Get state error: ', error.message);
+  }
+};
+const save = (key, value) => {
+  try {
+    const serializedState = JSON.stringify(value);
+    localStorage.setItem(key, serializedState);
+  } catch (error) {
+    console.error('Set state error: ', error.message);
+  }
+};
 
 //функція формує обєкт із введених даних у формі згідно назви елементів форми та перетворює в строку і зберігає в localStorage
 function onLocalStorageSave(e) {
   formData[e.target.name] = e.target.value;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+  save(STORAGE_KEY, formData);
+  //   localStorage.setItem(STORAGE_KEY, JSON.stringify(formData)); //prevVersion
 }
 
 //функція при натисненні на кнопку submit: відключаємо подію перезавантаження сторінки, очищуємо поля поточної форми, формуємо обєкт із даних в localStorage, очщаємо localStorage по ключу STORAGE_KEY та виводимо обєкт в консоль
 function onFormSubmit(e) {
   e.preventDefault();
   e.currentTarget.reset();
-
-  let userData = '';
-  try {
-    userData = JSON.parse(localStorage.getItem(STORAGE_KEY));
-  } catch {
-    console.log(error.name);
-    console.log(error.message);
-  }
-
+  const userData = load(STORAGE_KEY);
   localStorage.removeItem(STORAGE_KEY);
   return console.log(userData);
 }
 
 //перевіряємо чи є дані від попереднього введення у форму та якщо є - прописуємо збережені дані у форму, виклик функції в місці оголошення
-// getStorageKey();
-(function getStorageKey(e) {
-  const savedData = localStorage.getItem(STORAGE_KEY);
-  if (savedData) {
-    let userData = {};
-
-    try {
-      userData = JSON.parse(savedData);
-    } catch {
-      console.log(error.name);
-      console.log(error.message);
-    }
+(function getStorageKey() {
+  if (localStorage.getItem(STORAGE_KEY)) {
+    const userData = load(STORAGE_KEY);
 
     refs.form.message.value = userData.message;
     refs.form.email.value = userData.email;
