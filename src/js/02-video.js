@@ -1,5 +1,6 @@
 import throttle from 'lodash.throttle';
 import Player from '@vimeo/player';
+
 const iframe = document.querySelector('iframe');
 const player = new Player(iframe);
 const STORAGE_KEY = 'videoplayer-current-time';
@@ -15,13 +16,13 @@ const onTimeUpdate = function ({ seconds }) {
   }
 };
 
-// отримуємо збережий час з localStorage та передаємо до плеєру перед запуском перегляду
-const onStartFromPrevTime = function () {
+// отримуємо збережий час з localStorage та передаємо до плеєрупри завантаженні сторінки
+(function () {
   const currentTime = localStorage.getItem(STORAGE_KEY);
-  player.setCurrentTime(currentTime);
-};
+  if (currentTime) {
+    player.setCurrentTime(currentTime);
+  }
+})();
 
 //додаємо слухача подій плеєра та кожні 1000мс отримуємо поточне значення в секундах переглянутого відео
 player.on('timeupdate', throttle(onTimeUpdate, 1000));
-//додаємо слухача на старт програвання відео та додаємо значення в секундахб де був зупинений перегляд останнього сеансу
-player.on('play', onStartFromPrevTime);
